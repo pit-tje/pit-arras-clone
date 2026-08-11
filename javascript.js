@@ -15,13 +15,24 @@ const ownerID = 1
 
 const playerArray = [];
 
+class Vector {
+  constructor(x,y) {
+    this.x = x
+    this.y = y
+  }
+  null() {
+    this.x = 0
+    this.y = 0
+  }
+}
+
 class Player {
   constructor(x, y, radius, speed, owner) {
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.dx = 0;
-    this.dy = 0;
+    this.velocity = new Vector(0,0);
+    this.acceleration = new Vector(0,0);
     this.speed = speed;
     this.owner = owner;
   }
@@ -123,29 +134,44 @@ function keyUpHandler(e) {
 }
 
 function velocityCalculation (player) {
-    if (rightPressed) {
-    player.dx += player.speed;
+  manualMovementVelocityCalculation();
+}
+
+function manualMovementVelocityCalculation () {
+  let addedX = 0;
+  let addedY = 0
+  if (rightPressed) {
+    addedX += player.speed;
   }
   if (leftPressed) {
-    player.dx -= player.speed;
+    addedX -= player.speed;
   }
   if (upPressed) {
-    player.dy -= player.speed;
+    addedY -= player.speed;
   }
   if (downPressed) {
-    player.dy += player.speed;
+    addedY += player.speed;
   }
+  if (Math.sqrt(addedX**2, addedY**2) >= player.speed) {
+    addedX *= 2**0.5 * 0.5
+    addedY *= 2**0.5 * 0.5
+  }
+  player.acceleration.x += addedX;
+  player.acceleration.y += addedY;
 }
 
 function calculatePlayers() {
   for (player of playerArray) {
-    player.x += player.dx;
-    player.y +=player.dy;
     if (player.owner == ownerID) {
       velocityCalculation(player);
     }
-    player.dx = player.dx * 0.9
-    player.dy = player.dy * 0.9
+    player.velocity.x += player.acceleration.x;
+    player.velocity.y += player.acceleration.y;    
+    player.x += player.velocity.x;
+    player.y +=player.velocity.y;
+    player.velocity.x = player.velocity.x * 0.9
+    player.velocity.y = player.velocity.y * 0.9
+    player.acceleration.null();
     player.x = Math.max(Math.min(player.x, 500), -500)
     player.y = Math.max(Math.min(player.y, 500), -500)
   }
@@ -159,8 +185,8 @@ function drawText() {
   ctx.fillStyle = "#0095DD";
   ctx.fillText(`x: ${playerArray[0].x}`, 8, 20);
   ctx.fillText(`y: ${playerArray[0].y}`, 8, 40);
-  ctx.fillText(`dx: ${playerArray[0].dx}`, 8, 60);
-  ctx.fillText(`dy: ${playerArray[0].dy}`, 8, 80);
+  ctx.fillText(`velocity x: ${playerArray[0].velocity.x}`, 8, 60);
+  ctx.fillText(`velocity y: ${playerArray[0].velocity.y}`, 8, 80);
 }
 
 function draw() {

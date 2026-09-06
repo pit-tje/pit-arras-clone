@@ -1,7 +1,15 @@
-const canvas = document.getElementById("myCanvas");
+import { createRenderer } from "./draw.js";
+import { Vector, Entity } from "./definitions.js"
+
+const canvas = document.getElementById("myCanvas"); 
 const ctx = canvas.getContext("2d");
 
-gridSize = 30
+const renderer = createRenderer(ctx,canvas);
+
+
+
+
+const gridSize = 30
 
 let rightPressed = false;
 let leftPressed = false;
@@ -18,16 +26,8 @@ const ownerID = 1
 
 const entityArray = [];
 
-class Vector {
-  constructor(x,y) {
-    this.x = x
-    this.y = y
-  }
-  null() {
-    this.x = 0
-    this.y = 0
-  }
-}
+
+
 /*
 class Barrel {
   constructor(length, width) {
@@ -45,19 +45,7 @@ class Barrel {
   I'll be using something like this later. first i wanna see if i can get bullets to work at all
 */
 
-class Entity {
-  constructor(x, y, radius, speed, owner) {
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.velocity = new Vector(0,0);
-    this.acceleration = new Vector(0,0);
-    this.speed = speed;
-    this.owner = owner;
-    this.barrel = [];
-    this.isPlayer = true;
-  }
-}
+
 
 const view = {
   x: 0,
@@ -69,7 +57,7 @@ entityArray[1] = new Entity(50, 50, 30, 0.2, 2)
 entityArray[2] = new Entity(90, -50, 20, 0.2, 2)
 
 function setView () {
-  for (entity of entityArray) {
+  for (const entity of entityArray) {
     if (entity.owner == ownerID) {
       view.x = entity.x
       view.y = entity.y
@@ -77,54 +65,14 @@ function setView () {
   }
 }
 
-function drawPlayerBody () {
-  if (entity.owner == ownerID) {
-      drawOwnPlayerBody();
-  } else {
-    drawOtherPlayerBody();
-  }
-
-}
 
 
-function drawOwnPlayerBody () {
-  ctx.beginPath();
-  ctx.arc(canvas.width/2, canvas.height/2, entity.radius, 0, Math.PI*2)
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
-}
 
-function drawOtherPlayerBody () {
-  ctx.beginPath();
-  ctx.arc(canvas.width/2-view.x+entity.x, canvas.height/2-view.y+entity.y, entity.radius, 0, Math.PI*2)
-  ctx.fillStyle = "#dd0000";
-  ctx.fill();
-  ctx.closePath();
-}
 
-function drawEntity () {
-  if (entity.isPlayer) {
-    drawPlayerBody();
-  }
-}
 
-function drawGrid () {
-  ctx.lineWidth = 1;
-  for (let gx = 0; gx < canvas.width+gridSize ; gx += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(gx - view.x%gridSize, 0);
-    ctx.lineTo(gx - view.x%gridSize, canvas.height);
-    ctx.stroke();
-  }
-  for (let gy = 0; gy < canvas.height+gridSize; gy += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(0, gy - view.y%gridSize);
-    ctx.lineTo(canvas.width, gy - view.y%gridSize);
-    ctx.stroke();
-  }
-    
-}
+
+
+
 
 function keyDownHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") {
@@ -165,10 +113,10 @@ function mouseUpHandler() {
 }
 
 function velocityCalculation (player) {
-  manualMovementVelocityCalculation();
+  manualMovementVelocityCalculation(player);
 }
 
-function manualMovementVelocityCalculation () {
+function manualMovementVelocityCalculation (entity) {
   let addedX = 0;
   let addedY = 0
   if (rightPressed) {
@@ -191,10 +139,10 @@ function manualMovementVelocityCalculation () {
   entity.acceleration.y += addedY;
 }
 
-function calculatePlayers() {
+function calculatePlayers(entity) {
 
   if (entity.isPlayer && entity.owner == ownerID) {
-    velocityCalculation();
+    velocityCalculation(entity);
   }
     entity.velocity.x += entity.acceleration.x;
     entity.velocity.y += entity.acceleration.y;    
@@ -210,38 +158,29 @@ function calculatePlayers() {
 
 }
 
-function drawText() {
-  ctx.font = "16px Arial";
-  ctx.fillStyle = "#0095DD";
-  ctx.fillText(`x: ${entityArray[0].x}`, 8, 20);
-  ctx.fillText(`y: ${entityArray[0].y}`, 8, 40);
-  ctx.fillText(`velocity x: ${entityArray[0].velocity.x}`, 8, 60);
-  ctx.fillText(`velocity y: ${entityArray[0].velocity.y}`, 8, 80);
-}
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  setView();
-  drawGrid();
-  for (entity of entityArray) {
-    drawEntity();
-  }
-  drawText();
-  
-}
+
+
 
 function calculate() {
-  for (entity of entityArray) {
-    calculatePlayers()
+  for (const entity of entityArray) {
+    calculatePlayers(entity);
+    
   }
   if (mousePressed) {
-    entityArray.push(new Entity(entityArray[0].x, entityArray[0].y, 20, 0.2, 2))
+    entityArray.push(new Entity(entityArray[1].x, entityArray[1].y, 20, 0.2, 2))
+    entityArray[1].velocity.x += (Math.random()-0.5)* entityArray[0].x
+    entityArray[1].velocity.y += (Math.random()-0.5)* entityArray[0].y
   }
 }
 
 function gameTick () {
   calculate();
-  draw();
+  setView();
+
+  renderer.draw(entityArray, view, ownerID, gridSize);
+  
+  
   requestAnimationFrame(gameTick);
 }
 

@@ -11,6 +11,12 @@ const renderer = createRenderer(ctx,canvas);
 
 const gridSize = 30
 
+let mouseX = 0
+let mouseY = 0
+let relativeX = 0
+let relativeY = 0
+
+
 let rightPressed = false;
 let leftPressed = false;
 let upPressed = false;
@@ -21,6 +27,7 @@ document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 document.addEventListener("mousedown", mouseDownHandler);
 document.addEventListener("mouseup", mouseUpHandler);
+document.addEventListener("mousemove", mouseMoveHandler);
 
 const ownerID = 1
 
@@ -68,7 +75,12 @@ function setView () {
 
 
 
-
+function mouseMoveHandler(e) {
+  mouseX = event.clientX - canvas.offsetLeft;
+  mouseY = event.clientY + canvas.offsetTop;
+  relativeX = mouseX - canvas.width/2
+  relativeY = mouseY - canvas.height/2
+}
 
 
 
@@ -151,13 +163,24 @@ function calculatePlayers(entity) {
     entity.velocity.x = entity.velocity.x * 0.9
     entity.velocity.y = entity.velocity.y * 0.9
     entity.acceleration.null();
-    entity.x = Math.max(Math.min(entity.x, 500), -500)
-    entity.y = Math.max(Math.min(entity.y, 500), -500)
+    entity.x = Math.max(Math.min(entity.x, 10000), -10000)
+    entity.y = Math.max(Math.min(entity.y, 10000), -10000)
 
 
 
 }
 
+function fireBullet() {
+  for (const player of entityArray) {
+    if (player.isPlayer && player.owner == ownerID) {
+      entityArray.push( new Entity(player.x, player.y, player.radius/4, 4,2))
+      entityArray[entityArray.length-1].velocity.x += relativeX/22.5
+      entityArray[entityArray.length-1].velocity.y += relativeY/12.5
+
+    }
+  }
+  
+}
 
 
 
@@ -168,9 +191,7 @@ function calculate() {
     
   }
   if (mousePressed) {
-    entityArray.push(new Entity(entityArray[1].x, entityArray[1].y, 20, 0.2, 2))
-    entityArray[1].velocity.x += (Math.random()-0.5)* entityArray[0].x
-    entityArray[1].velocity.y += (Math.random()-0.5)* entityArray[0].y
+    fireBullet();
   }
 }
 

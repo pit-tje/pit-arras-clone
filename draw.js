@@ -12,9 +12,9 @@ export function createRenderer(ctx, canvas) {
   }
 
   function drawEntity (entity,view,ownerID) {
-    if (entity.isPlayer) {
-      drawPlayerBody(entity,view,ownerID);
-    }
+    
+    drawPlayerBody(entity,view,ownerID);
+
   }
 
 

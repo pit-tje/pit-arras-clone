@@ -1,5 +1,5 @@
 import { createRenderer } from "./draw.js";
-import { Vector, Entity } from "./definitions.js"
+import { Vector, Entity, Player } from "./definitions.js"
 
 const canvas = document.getElementById("myCanvas"); 
 const ctx = canvas.getContext("2d");
@@ -35,22 +35,7 @@ const entityArray = [];
 
 
 
-/*
-class Barrel {
-  constructor(length, width) {
-    this.length = length
-    this.width = width
-    this.angle = 0
-    this.bulletstats = {
-      class: 0,
-      size: this.width,
-      speed: 0,  gonna make this rely on player stats 
 
-    }
-  }
-}
-  I'll be using something like this later. first i wanna see if i can get bullets to work at all
-*/
 
 
 
@@ -59,13 +44,13 @@ const view = {
   y: 0
 }
 
-entityArray[0] = new Entity(0, 0, 30, 0.2, 1)
-entityArray[1] = new Entity(50, 50, 30, 0.2, 2)
-entityArray[2] = new Entity(90, -50, 20, 0.2, 2)
+entityArray[0] = new Player(0, 0, 30, 1, 0.2)
+entityArray[1] = new Entity(50, 50, 30)
+entityArray[2] = new Entity(90, -50, 20)
 
 function setView () {
   for (const entity of entityArray) {
-    if (entity.owner == ownerID) {
+    if (entity.constructor.name == "Player" && entity.owner == ownerID) {
       view.x = entity.x
       view.y = entity.y
     }
@@ -132,18 +117,18 @@ function manualMovementVelocityCalculation (entity) {
   let addedX = 0;
   let addedY = 0
   if (rightPressed) {
-    addedX += entity.speed;
+    addedX += entity.stats.speed;
   }
   if (leftPressed) {
-    addedX -= entity.speed;
+    addedX -= entity.stats.speed;
   }
   if (upPressed) {
-    addedY -= entity.speed;
+    addedY -= entity.stats.speed;
   }
   if (downPressed) {
-    addedY += entity.speed;
+    addedY += entity.stats.speed;
   }
-  if (Math.sqrt(addedX**2, addedY**2) >= entity.speed) {
+  if (Math.sqrt(addedX**2 + addedY**2) > entity.stats.speed) {
     addedX *= 2**0.5 * 0.5
     addedY *= 2**0.5 * 0.5
   }
@@ -151,7 +136,7 @@ function manualMovementVelocityCalculation (entity) {
   entity.acceleration.y += addedY;
 }
 
-function calculatePlayers(entity) {
+function calculateEntities(entity) {
 
   if (entity.isPlayer && entity.owner == ownerID) {
     velocityCalculation(entity);
@@ -173,10 +158,10 @@ function calculatePlayers(entity) {
 function fireBullet() {
   for (const player of entityArray) {
     if (player.isPlayer && player.owner == ownerID) {
-      entityArray.push( new Entity(player.x, player.y, player.radius/4, 4,2))
-      entityArray[entityArray.length-1].velocity.x += relativeX/22.5
-      entityArray[entityArray.length-1].velocity.y += relativeY/12.5
-
+      const newBullet = new Entity (player.x, player.y, player.radius/4, 4,2)
+      newBullet.velocity.x += relativeX/22.5
+      newBullet.velocity.y += relativeY/12.5
+      entityArray.push(newBullet)
     }
   }
   
@@ -187,7 +172,7 @@ function fireBullet() {
 
 function calculate() {
   for (const entity of entityArray) {
-    calculatePlayers(entity);
+    calculateEntities(entity);
     
   }
   if (mousePressed) {

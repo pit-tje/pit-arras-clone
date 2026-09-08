@@ -167,7 +167,14 @@ function calculateBarrels(player, barrel) {
   if (mousePressed) {
     fireBullet(player, barrel)
   }
+  calculateBarrelAngle(barrel);
 }
+
+function calculateBarrelAngle(barrel) {
+  barrel.angle = Math.atan2(relativeY, relativeX)
+}
+
+
 
 function fireBullet(player, barrel) {
   /*
@@ -182,8 +189,8 @@ function fireBullet(player, barrel) {
     */
 
   const newBullet = new Entity(player.x, player.y, 7.5)
-  newBullet.velocity.x += relativeX/22.5
-  newBullet.velocity.y += relativeY/12.5
+  newBullet.velocity.x += Math.cos(barrel.angle) * player.stats.bulletSpeed
+  newBullet.velocity.y += Math.sin(barrel.angle) * player.stats.bulletSpeed
 
   entityArray.push(newBullet)
   
@@ -197,7 +204,8 @@ function calculate() {
   for (const entity of entityArray) {
     calculateEntities(entity);
     for (const barrelIndex in entity.barrel) {
-      calculateBarrels(entity, entity.barrel[barrelIndex]);     
+      calculateBarrels(entity, entity.barrel[barrelIndex]); 
+        
     }
   }
 

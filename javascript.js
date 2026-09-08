@@ -1,5 +1,5 @@
 import { createRenderer } from "./draw.js";
-import { Vector, Entity, Player } from "./definitions.js"
+import { Vector, Entity, Player, Barrel } from "./definitions.js"
 
 const canvas = document.getElementById("myCanvas"); 
 const ctx = canvas.getContext("2d");
@@ -45,6 +45,11 @@ const view = {
 }
 
 entityArray[0] = new Player(0, 0, 30, 1, 0.2)
+const barrelInfo = {
+  length: 1,
+  cooldown: 1
+}
+entityArray[0].barrel.push(new Barrel(barrelInfo, entityArray[0]))
 entityArray[1] = new Entity(50, 50, 30)
 entityArray[2] = new Entity(90, -50, 20)
 
@@ -140,7 +145,10 @@ function calculateEntities(entity) {
 
   if (entity.isPlayer && entity.owner == ownerID) {
     velocityCalculation(entity);
+
   }
+
+
     entity.velocity.x += entity.acceleration.x;
     entity.velocity.y += entity.acceleration.y;    
     entity.x += entity.velocity.x;
@@ -155,7 +163,14 @@ function calculateEntities(entity) {
 
 }
 
-function fireBullet() {
+function calculateBarrels(player, barrel) {
+  if (mousePressed) {
+    fireBullet(player, barrel)
+  }
+}
+
+function fireBullet(player, barrel) {
+  /*
   for (const player of entityArray) {
     if (player.isPlayer && player.owner == ownerID) {
       const newBullet = new Entity (player.x, player.y, player.radius/4, 4,2)
@@ -164,6 +179,14 @@ function fireBullet() {
       entityArray.push(newBullet)
     }
   }
+    */
+
+  const newBullet = new Entity(player.x, player.y, 7.5)
+  newBullet.velocity.x += relativeX/22.5
+  newBullet.velocity.y += relativeY/12.5
+
+  entityArray.push(newBullet)
+  
   
 }
 
@@ -173,11 +196,11 @@ function fireBullet() {
 function calculate() {
   for (const entity of entityArray) {
     calculateEntities(entity);
-    
+    for (const barrelIndex in entity.barrel) {
+      calculateBarrels(entity, entity.barrel[barrelIndex]);     
+    }
   }
-  if (mousePressed) {
-    fireBullet();
-  }
+
 }
 
 function gameTick () {

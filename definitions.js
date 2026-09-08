@@ -38,7 +38,7 @@ export class Player extends Entity {
 export class Barrel {
   constructor(info, owner) {
     this.length = info.length
-    this.width = info.width
+    this.width = owner.radius/4
     this.angle = 0
     this.bulletstats = {
       size: this.width,

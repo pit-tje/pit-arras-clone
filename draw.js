@@ -1,14 +1,34 @@
 export function createRenderer(ctx, canvas) {
+  const x0 = canvas.width/2
+  const y0 = canvas.height/2
 
   function draw(entityArray, view, ownerID, gridSize) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid(view, gridSize);
     for (const entity of entityArray) {
       drawEntity(entity, view, ownerID);
+      for (const barrelIndex in entity.barrel) {
+        drawBarrel(entity.barrel[barrelIndex])
+      
+        
+      }
     }
 
     drawText(entityArray);
     
+  }
+
+  function drawBarrel(barrel,view) {
+    
+    ctx.beginPath();
+    ctx.moveTo(x0+(Math.cos(barrel.angle-0.5*Math.PI)*barrel.width),y0+(Math.sin(barrel.angle-0.5*Math.PI)*barrel.width));     
+    ctx.lineTo(x0+(Math.cos(barrel.angle+0.5*Math.PI)*barrel.width),y0+(Math.sin(barrel.angle+0.5*Math.PI)*barrel.width));
+    ctx.lineTo(x0+(Math.cos(barrel.angle)*barrel.length)+(Math.cos(barrel.angle+0.5*Math.PI)*barrel.width),y0+(Math.sin(barrel.angle)*barrel.length)+(Math.sin(barrel.angle+0.5*Math.PI)*barrel.width));
+    ctx.lineTo(x0+(Math.cos(barrel.angle)*barrel.length)+(Math.cos(barrel.angle-0.5*Math.PI)*barrel.width),y0+(Math.sin(barrel.angle)*barrel.length)+(Math.sin(barrel.angle-0.5*Math.PI)*barrel.width));
+
+    ctx.fillStyle = "#757575";
+    ctx.fill();
+    ctx.closePath();
   }
 
   function drawEntity (entity,view,ownerID) {

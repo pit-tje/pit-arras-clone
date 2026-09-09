@@ -46,7 +46,7 @@ const view = {
 
 entityArray[0] = new Player(0, 0, 30, 1, 0.2)
 const barrelInfo = {
-  length: 1,
+  length: 80,
   cooldown: 1
 }
 entityArray[0].barrel.push(new Barrel(barrelInfo, entityArray[0]))
